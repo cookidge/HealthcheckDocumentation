@@ -1,0 +1,1220 @@
+<!DOCTYPE html PUBLIC "-//W3C//DTD XHTML 1.0 Strict//EN" "http://www.w3.org/TR/xhtml1/DTD/xhtml1-strict.dtd">
+<html xmlns="http://www.w3.org/1999/xhtml">
+<head>
+
+    <meta content="IE=EmulateIE9" http-equiv="X-UA-Compatible"/>
+    <link href="favicon.ico" rel="shortcut icon"/>
+    <title>Updating Industry Suppression Lists</title>
+    <meta content="en-us" name="Language"/>
+    <meta content="239b501a-f1e0-4ee6-bce2-6a8e2b520998" name="Microsoft.Help.Id"/>
+    <meta content="Out of all the possible changes to the code that might need to be carried out (excluding Cygnus re-developing the _Merged.xml output) changing the code to reflect any changes to the Industry Suppression lists is the most convoluted." name="Description"/>
+    <meta content="How To" name="Microsoft.Help.ContentType"/>
+    <meta content="true" name="BrandingAware"/>
+    <meta http-equiv="Content-Type" content="text/html; charset=utf-8"/>
+  <link href="stylesheet.css" rel="stylesheet" type="text/css"/>
+<link href="page_styles.css" rel="stylesheet" type="text/css"/>
+
+  
+
+
+<link href="calibreHtmlOutBasicCss.css" type="text/css" rel="stylesheet" />
+
+</head>
+<body>
+
+<div class="calibreMeta">
+  <div class="calibreMetaTitle">
+  
+  
+    
+    <h1>
+      <a href="../n4gxd-4gu80.html">Healthcheck Plus 2 Technical Documentation
+</a>
+    </h1>
+    
+    
+  
+  </div>
+  <div class="calibreMetaAuthor">
+    Unknown
+
+  </div>
+</div>
+
+<div class="calibreMain">
+
+  <div class="calibreEbookContent">
+    
+      <div class="calibreEbNavTop">
+        
+          <a href="9e5bb667-3ff6-4a6e-ba91-7c40bc7882b6.htm" class="calibreAPrev">previous page</a>
+        
+
+        
+          <a href="b4af800d-ebce-22f3-26ce-9c1fa68fda3e.htm" class="calibreANext"> next page</a>
+        
+      </div>
+    
+
+    
+  <input class="userdatastyle" id="userDataCache" type="hidden"/>
+  <div class="pageheader" id="PageHeader">Healthcheck Plus 2 Technical Documentation</div>
+  <div class="pagebody">
+    <div class="topiccontent" id="TopicContent">
+      <table class="titletable">
+        <tbody class="calibre1">
+          <tr class="calibre2">
+            <td class="logocolumn">
+              <img src="Help.png" class="calibre3"/>
+            </td>
+            <td class="titlecolumn">Updating Industry Suppression Lists</td>
+          </tr>
+        </tbody>
+      </table>
+      <span class="introstyle"></span>
+      <p class="calibre4">[This is preliminary documentation and is subject to change.]</p>
+      <div class="introduction">
+        <p class="calibre5">
+        Out of all the possible changes to the code that might need to be carried out (excluding Cygnus re-developing the _Merged.xml output) changing the code
+        to reflect any changes to the Industry Suppression lists is the most convoluted. In addition to that, only half of the process is documented here. The
+        changes that need to be made to the WFDs are documented separately.
+      </p>
+        <p class="calibre5">
+        Fortunately, in this case, when it comes to Industry Suppressions, the source file is a csv created by ourselves, exported from the Cygnus workflow.
+      </p>
+        <p class="calibre5">
+        Before documenting the technical process, it is important to understand how it works at a higher level, as a series of steps the application undertakes:
+      </p>
+      </div>
+      <h3 class="proceduresubheading">Industry Suppression Lists - Overview</h3>
+      <div class="introduction">
+        <ol class="calibre11">
+          <li class="calibre8">
+            <p class="calibre5">
+              <strong class="calibre6">Exporting the Industry Suppression Counts</strong>
+            </p>
+            <p class="calibre5">After the job has been selected, and the confirm button on the form is clicked, the Industry Suppressions are processed (should they exist),
+            any pre-existing output files are deleted at this stage, this includes the <strong class="calibre6">industry_suppressions.csv</strong> and the <strong class="calibre6">
+              industry_costs.csv</strong>.
+           </p>
+            <p class="calibre5">
+              The industry suppressions are exported; this involves reading the exported csv produced by Cygnus, recording the names of each file into an array.
+              This array is then used to loop through each filename in the csv. As each record in the csv is a unique hit against a suppression list, the type of hit
+              is recorded against that filename, incrementing the corressponding index in the array for that list, for the current filename in the loop. The totals for the
+              current filename are calculated across the array, and appended as an additional index in the array. This array is appended as a single line in the 
+              <strong class="calibre6">industry_suppressions.csv</strong>.
+            </p>
+          </li>
+          <li class="calibre8">
+            <p class="calibre5">
+              <strong class="calibre6">Exporting the Industry Suppression Totals</strong>
+            </p>
+            <p class="calibre5">The totals are then calculated across all the filenames (lines) in the csv that has just been created. This is performed by looping through each
+            line, and printing the sum of each column (that contains volumes only) at the bottom of the csv. The totals are also retained in memory by the application
+          for the next step.</p>
+          </li>
+          <li class="calibre8">
+            <p class="calibre5">
+              <strong class="calibre6">Exporting the Industry Suppression Costs</strong>
+            </p>
+            <p class="calibre5">Probably the most complicated step in the Industry Suppressions process. The totals retained in memory during the previous step
+            are multiplied by 0.6 or 0.2, first for flags, second for deletes. The list that the costs is being calculated for is determined by its location
+          in the array. So <strong class="calibre6">when the lists are changed this affects both this step and all the ones before it</strong>. The costs for both
+          flags and deletes are appended as lines in the <strong class="calibre6">industry_costs.csv</strong>. These two output files are then pulled into the WFD at the
+          report creation stage into two separate tables that reflect the file contents. <strong class="calibre6">Any list changes need to be made in the WFD also</strong>.
+          </p>
+            <p class="calibre5"><strong class="calibre6">NB: The file headings for each file also need to be changed to reflect list changes, this will be detailed in the technical documentation</strong>.
+            </p>
+          </li>
+        </ol>
+      </div>
+      <h3 class="proceduresubheading">Updating Industry Suppression Lists - Technical</h3>
+      <div class="introduction">
+        <ol class="calibre11">
+          <li class="calibre8">
+            <p class="calibre5">
+              <strong class="calibre6">Updating the FileHeadings() method</strong>
+            </p>
+            <p class="calibre5">
+              There are two strings in the FileHeadings() class constructor that need to be updated when changing lists.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EACADABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EACADABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EACADABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10">industry_suppression_headings = <span class="highlight-literal">"File,Input,NCOA_REDIR,GAS_REACT,NCOA_DECEASED,TBR,NDR,MORTA,MPS_DECEASED,NCOA,GAS,MPS_COLD,TOTAL DROPS, OUTPUT, TOTAL HITS,MATCH_LEVEL"</span>;
+suppression_cost_headings = <span class="highlight-literal">"Cost Type,,NCOA_REDIR,GAS_REACT,NCOA_DECEASED,TBR,NDR,MORTA,MPS_DECEASED,NCOA,GAS,MPS_COLD,Total_Cost"</span>;</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              The hierarchy required in the WFD needs to be reflected here, and throughout the rest of the code, as the array will print out the information for both the costs and totals
+              according to the index in the array (detailed in later steps). The file headings can be retrieved as follows, and will be detailed in a later code example.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EAAADABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EAAADABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EAAADABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-comment">// Industry Suppression headings written to file</span>
+entry_output.WriteLine(is_headings.GetSuppressionHeadings());
+
+<span class="highlight-comment">// Industry Suppression Costs headings written to file</span>
+cost_output.WriteLine(file_headings.GetCostHeadings());</pre>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="calibre8">
+            <p class="calibre5">
+              <strong class="calibre6">Updating the ExportIndustrySuppressions() method</strong>
+            </p>
+            <p class="calibre5">
+              The first few steps in this method will probably remain the same, in this first step the source file exported by Cygnus is declared.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EAZACABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EAZACABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EAZACABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-comment">// IS file path</span>
+<span class="highlight-keyword">string</span> file_path = RootOnServer() + <span class="highlight-literal">@"\Industry Suppression Drops.csv"</span>;
+ArrayList is_csv = <span class="highlight-keyword">new</span> ArrayList();
+ArrayList file_names = <span class="highlight-keyword">new</span> ArrayList();</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              Then the column indexes are set, this tells the application where the filenames and hit type columns exist in the csv. The line counter is also declared
+              and set.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EAXACABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EAXACABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EAXACABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-comment">// Set columns</span>
+<span class="highlight-keyword">int</span> filenames = <span class="highlight-number">5</span>;
+<span class="highlight-keyword">int</span> supphit = <span class="highlight-number">3</span>;
+<span class="highlight-keyword">int</span> line_count = <span class="highlight-number">1</span>;</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              The file is then read into memory in the form of an array, this enables faster processing as we progress.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EAVACABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EAVACABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EAVACABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-comment">// Open CSV</span>
+StreamReader read_csv = <span class="highlight-keyword">new</span> StreamReader(<span class="highlight-keyword">new</span> FileStream(file_path,FileMode.Open,FileAccess.Read));
+
+<span class="highlight-comment">// Read CSV to ArrayList</span>
+<span class="highlight-keyword">do</span>
+{
+  <span class="highlight-comment">// Populate array [one line per index]</span>
+  is_csv.Add(read_csv.ReadLine());
+
+} <span class="highlight-keyword">while</span> (read_csv.EndOfStream == <span class="highlight-keyword">false</span>);
+
+<span class="highlight-comment">// Close CSV</span>
+read_csv.Close();</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              Now the first loop in the method is performed, all we want to achieve in this loop is read a unique set of filenames into an array, each line in the array (of the file in memory) is split into an array of its own
+              (an array of columns for that line only).
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EATACABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EATACABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EATACABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-comment">// Cycle through array of industry suppressions</span>
+<span class="highlight-keyword">foreach</span> (<span class="highlight-keyword">string</span> line <span class="highlight-keyword">in</span> is_csv)
+{
+    <span class="highlight-comment">// Break line into array</span>
+    <span class="highlight-keyword">string</span>[] record = line.Split(<span class="highlight-keyword">new</span> Char[]{<span class="highlight-literal">','</span>});</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              This enables the application to switch the code to apply, depending on which line of the file we are looking at. In this case, line one is the headings
+              so all we do here is ignore it, remembering to increment the line count. When the line count reaches 2, the first filename in the file is stored in the file_names
+              array. We're able to identify the filename in the line by using the filenames variable that we set previously to 5, as column 5 holds the name of the file.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EARACABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EARACABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EARACABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-keyword">switch</span> (line_count)
+{
+    <span class="highlight-keyword">case</span> <span class="highlight-number">1</span>:
+        <span class="highlight-comment">// Ignore file heading</span>
+        <span class="highlight-comment">// Iterate line count</span>
+        line_count++;
+        <span class="highlight-keyword">break</span>;
+    <span class="highlight-keyword">case</span> <span class="highlight-number">2</span>:
+        <span class="highlight-comment">// Store first filename</span>
+        file_names.Add(record[filenames]);
+        <span class="highlight-comment">// Iterate line count</span>
+        line_count++;
+        <span class="highlight-keyword">break</span>;
+    <span class="highlight-keyword">default</span>:</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              Still inside the loop at this stage, we need to apply code for the default case, in other words, whenever the line count is not at 1 or 2. As we're
+              only looking for the unique filenames we set a flag of exists to false, read through the filenames already stored, and if the current line's filename
+              is already held in the array, then exists is set to true. After checking back, if the exists variable is still set to false, then the filename is stored.
+            </p>
+            <p class="calibre5">
+              <strong class="calibre6">This functionality should never need to be updated, all that may change is the location of the filename or supphit column in the file exported from Cygnus,
+                of which the index variables set initially can be changed to reflect their column position in the file.</strong>
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EAOACABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EAOACABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EAOACABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10">        <span class="highlight-comment">// Set flag</span>
+        <span class="highlight-keyword">bool</span> exists = <span class="highlight-keyword">false</span>;
+
+        <span class="highlight-comment">// Check back to added filenames</span>
+        <span class="highlight-keyword">foreach</span> (<span class="highlight-keyword">string</span> filename <span class="highlight-keyword">in</span> file_names)
+        {
+            <span class="highlight-comment">// if filename already exists then flag</span>
+            <span class="highlight-keyword">if</span> (filename == record[filenames])
+            {
+                exists = <span class="highlight-keyword">true</span>;
+            }
+        }
+
+        <span class="highlight-comment">// Check flag</span>
+        <span class="highlight-keyword">if</span> (exists == <span class="highlight-keyword">false</span>)
+        {
+            <span class="highlight-comment">// Add to list of filenames</span>
+            file_names.Add(record[filenames]);
+        }
+
+        <span class="highlight-comment">// Iterate line count</span>
+        line_count++;
+        <span class="highlight-keyword">break</span>;
+    }
+}</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              The second loop is then performed, this time we're looping through the array of unique filenames that we've just created in the previous loop. However,
+              this time we're using a nested loop, as for each iteration of this loop, we loop through the exported Cygnus file we're holding in memory again, and finding
+              the supphits for the current file.
+            </p>
+            <p class="calibre5">
+              Each time we loop through the unique file_names, we create an array of suppressions to size 15, this 5 (filename, input volume, total drops, total hits and total output),
+              plus however many lists we have (10 in this case) <strong class="calibre6">should the number of lists increase or decrease, this size will need to be changed respectively</strong>.
+              The counters for each list type are also declared and initialised at this stage, and will need to be updated should be lists change.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EALACABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EALACABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EALACABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-comment">// Loop through each file</span>
+<span class="highlight-keyword">foreach</span> (<span class="highlight-keyword">string</span> file <span class="highlight-keyword">in</span> file_names)
+{
+      <span class="highlight-comment">// Create array</span>
+      <span class="highlight-keyword">string</span>[] file_suppressions = <span class="highlight-keyword">new</span> <span class="highlight-keyword">string</span>[<span class="highlight-number">15</span>];
+
+      <span class="highlight-comment">// Store file name in multi-dimensional array</span>
+      file_suppressions[<span class="highlight-number">0</span>] = file;
+      <span class="highlight-keyword">int</span> ncoa_redir = <span class="highlight-number">0</span>, gas_react = <span class="highlight-number">0</span>, ncoa_dec = <span class="highlight-number">0</span>, tbr = <span class="highlight-number">0</span>, ndr = <span class="highlight-number">0</span>, morta = <span class="highlight-number">0</span>, mps_dec = <span class="highlight-number">0</span>, ncoa = <span class="highlight-number">0</span>, gas = <span class="highlight-number">0</span>, mps = <span class="highlight-number">0</span>;</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              The nested loop within the file name array is now performed, looping through each line of the raw suppressions file, each line is split into it's respective fields,
+              If the filename for the hit is the same as the current file held in the outside loop, the work populating the suppressions counts begins by storing the input volume. 
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EAJACABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EAJACABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EAJACABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-comment">// Match back file with is array</span>
+<span class="highlight-keyword">foreach</span> (<span class="highlight-keyword">string</span> line <span class="highlight-keyword">in</span> is_csv)
+{
+    <span class="highlight-comment">// Split hit into parts</span>
+    <span class="highlight-keyword">string</span>[] parts = line.Split(<span class="highlight-keyword">new</span> Char[] { <span class="highlight-literal">','</span> });
+
+    <span class="highlight-comment">// Check filename matches</span>
+    <span class="highlight-keyword">if</span> (file == parts[filenames])
+    {
+        <span class="highlight-comment">// Record input vol</span>
+        file_suppressions[<span class="highlight-number">1</span>] = parts[<span class="highlight-number">4</span>].ToString();
+        file_suppressions[<span class="highlight-number">1</span>] = file_suppressions[<span class="highlight-number">1</span>].Replace(<span class="highlight-literal">"\""</span>, <span class="highlight-literal">""</span>);</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              Like when looking at each filename earlier, we now look at the supphit column, and switch on the code to perform based on its content.
+              The cases contain the type of hit, as they are spelt exactly in the csv (the backslashes are used to escape the quotes in the csv). It is important
+              that the indexes and the hit type linked to them are maintained throughout the process. From the file headings to the array, to the lines output in the csv, and
+              the columns in the WFD. In this case, for example, each time "NCOA REDIR" exists as the supphit, the ncoa_redir variable is incremented, and added to the
+              file suppressions array at index 2, therefore file_suppressions[2] is the total number of ncoa redirects for the current file. Should the lists change, the code
+              will need to be changed to reflect the name of the supphit, and where we want to store it in the array. If a list is added or removed, it needs to be updated here.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EAHACABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EAHACABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EAHACABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10">         <span class="highlight-comment">// Switch between hits</span>
+         <span class="highlight-keyword">switch</span> (parts[supphit])
+         {
+               <span class="highlight-keyword">case</span> <span class="highlight-literal">"\"NCOA REDIR\""</span>:
+                   ncoa_redir++;
+                   file_suppressions[<span class="highlight-number">2</span>] = ncoa_redir.ToString();
+                   <span class="highlight-keyword">break</span>;
+               <span class="highlight-keyword">case</span> <span class="highlight-literal">"\"GAS REACT\""</span>:
+                   gas_react++;
+                   file_suppressions[<span class="highlight-number">3</span>] = gas_react.ToString();
+                   <span class="highlight-keyword">break</span>;
+               <span class="highlight-keyword">case</span> <span class="highlight-literal">"\"NCOA Deceased\""</span>:
+                   ncoa_dec++;
+                   file_suppressions[<span class="highlight-number">4</span>] = ncoa_dec.ToString();
+                   <span class="highlight-keyword">break</span>;
+               <span class="highlight-keyword">case</span> <span class="highlight-literal">"\"TBR\""</span>:
+                   tbr++;
+                   file_suppressions[<span class="highlight-number">5</span>] = tbr.ToString();
+                   <span class="highlight-keyword">break</span>;
+               <span class="highlight-keyword">case</span> <span class="highlight-literal">"\"NDR\""</span>:
+                   ndr++;
+                   file_suppressions[<span class="highlight-number">6</span>] = ndr.ToString();
+                   <span class="highlight-keyword">break</span>;
+               <span class="highlight-keyword">case</span> <span class="highlight-literal">"\"MORTA\""</span>:
+                   morta++;
+                   file_suppressions[<span class="highlight-number">7</span>] = morta.ToString();
+                   <span class="highlight-keyword">break</span>;
+               <span class="highlight-keyword">case</span> <span class="highlight-literal">"\"MPS Deceased\""</span>:
+                   mps_dec++;
+                   file_suppressions[<span class="highlight-number">8</span>] = mps_dec.ToString();
+                   <span class="highlight-keyword">break</span>;
+               <span class="highlight-keyword">case</span> <span class="highlight-literal">"\"NCOA\""</span>:
+                   ncoa++;
+                   file_suppressions[<span class="highlight-number">9</span>] = ncoa.ToString();
+                   <span class="highlight-keyword">break</span>;
+               <span class="highlight-keyword">case</span> <span class="highlight-literal">"\"GAS\""</span>:
+                   gas++;
+                   file_suppressions[<span class="highlight-number">10</span>] = gas.ToString();
+                   <span class="highlight-keyword">break</span>;
+               <span class="highlight-keyword">case</span> <span class="highlight-literal">"\"MPS\""</span>:
+                   mps++;
+                   file_suppressions[<span class="highlight-number">11</span>] = mps.ToString();
+                   <span class="highlight-keyword">break</span>;
+               <span class="highlight-keyword">default</span>:
+                   <span class="highlight-keyword">break</span>;
+         }
+     }
+}</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              The inner loop for the current filename is the outer loop is finished, we can now perform some operations on the totals for the current file. The total drops, file output and
+              hits are all calculated using the totals we've added for each hit type in the array. These indexes will need to be updated when the lists are changed. For example,
+              when the total hits are calculated, the total hits index position is 14, and as the total hits is the sum of ncoa redirects and gas reactive as well as the total drops, the sum of
+              indexes 12, 2 and 3 made. Should these positions change, or gas reactive is removed for example, these calculations will need to be updated.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EAFACABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EAFACABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EAFACABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-comment">// Totals drops</span>
+<span class="highlight-keyword">int</span> totals = ncoa_dec + tbr + ndr + morta + mps_dec + ncoa + gas + mps;
+file_suppressions[<span class="highlight-number">12</span>] = totals.ToString();
+
+<span class="highlight-comment">// File output</span>
+file_suppressions[<span class="highlight-number">13</span>] = Convert.ToString(Convert.ToInt64(file_suppressions[<span class="highlight-number">1</span>]) - totals);
+
+file_suppressions[<span class="highlight-number">0</span>] = file_suppressions[<span class="highlight-number">0</span>].Replace(<span class="highlight-literal">"\""</span>, <span class="highlight-literal">""</span>);
+
+<span class="highlight-comment">// Total hits</span>
+file_suppressions[<span class="highlight-number">14</span>] = Convert.ToString(Convert.ToInt64(file_suppressions[<span class="highlight-number">12</span>]) + Convert.ToInt64(file_suppressions[<span class="highlight-number">2</span>]) + Convert.ToInt64(file_suppressions[<span class="highlight-number">3</span>]));</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              Now the totals for the current filename in the loop have been created, this array needs to be output as a line. Therefore we create a single string to output from the
+              array itself. This process is scalable regardless of list changes and is unaffected.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EADACABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EADACABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EADACABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-comment">// Create line</span>
+StringBuilder current_entry = <span class="highlight-keyword">new</span> StringBuilder();
+
+<span class="highlight-keyword">for</span> (<span class="highlight-keyword">int</span> i = <span class="highlight-number">0</span>; i &lt; file_suppressions.Length; i++)
+    {
+            current_entry.Append(file_suppressions[i] + <span class="highlight-literal">","</span>);
+    }</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              The last step in this method is to write the line we've created to the output file itself, this shouldn't need to be changed if any lists are updated or removed.
+              If the file exists in this case (i.e. not the first filename we're outputting counts for) then only the line we've created is appended. If the file doesn't exist,
+              then the file headings are first written to the csv, before the line for the current file.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EABACABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EABACABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EABACABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10">     <span class="highlight-keyword">if</span> (File.Exists(OutputDirectory() + <span class="highlight-literal">"industry_suppressions.csv"</span>))
+     {
+           <span class="highlight-comment">// Write the current line</span>
+           <span class="highlight-keyword">using</span> (StreamWriter entry_output = <span class="highlight-keyword">new</span> StreamWriter(<span class="highlight-keyword">new</span> FileStream(OutputDirectory() + <span class="highlight-literal">"industry_suppressions.csv"</span>, FileMode.Append, FileAccess.Write, FileShare.Read)))
+           {
+               <span class="highlight-comment">// Write line to the csv file</span>
+               entry_output.WriteLine(current_entry);
+           }
+     }
+     <span class="highlight-keyword">else</span>
+     {
+           <span class="highlight-comment">// Get file heading</span>
+           FileHeadings is_headings = <span class="highlight-keyword">new</span> FileHeadings();
+
+           <span class="highlight-comment">// Write the current line</span>
+           <span class="highlight-keyword">using</span> (StreamWriter entry_output = <span class="highlight-keyword">new</span> StreamWriter(<span class="highlight-keyword">new</span> FileStream(OutputDirectory() + <span class="highlight-literal">"industry_suppressions.csv"</span>, FileMode.Append, FileAccess.Write, FileShare.Read)))
+           {
+               <span class="highlight-comment">// Write line to the csv file</span>
+               entry_output.WriteLine(is_headings.GetSuppressionHeadings());
+               entry_output.WriteLine(current_entry);
+           }
+     }
+}</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              That concludes the code in the ExportIndustrySuppressions() method, the next step concerns creating the totals for the file we've just output.
+            </p>
+          </li>
+          <li class="calibre8">
+            <p class="calibre5">
+              <strong class="calibre6">Updating the CalculateIndustryTotals() method</strong>
+            </p>
+            <p class="calibre5">
+              The majority of the code in this method can be left alone, so we won't be going into much detail. The first few steps of this method sets the file paths
+              and the file to read. The suppression count array is set to size 15, this needs to be the same size as the array in the ExportIndustrySuppressions
+              method, as it needs to change as the number of lists does.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EAGABABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EAGABABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EAGABABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-comment">// Declare constants</span>
+<span class="highlight-keyword">string</span> file_path = OutputDirectory() + <span class="highlight-literal">"industry_suppressions.csv"</span>;
+StreamReader is_csv = <span class="highlight-keyword">new</span> StreamReader(file_path);
+
+<span class="highlight-comment">// Declare variables</span>
+<span class="highlight-keyword">string</span> current_line;
+
+<span class="highlight-comment">// Declare suppression counter</span>
+<span class="highlight-keyword">int</span>[] suppression_counts = <span class="highlight-keyword">new</span> <span class="highlight-keyword">int</span>[<span class="highlight-number">15</span>];</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              This section of code doesn't need to amended, as it doesn't rely on a number of suppression lists. It performs the function of looping through the csv
+              we previously exported, splitting each line into an array of fields, and should the line not be a a heading, the sum of the current column is incremented
+              in the current index of the suppressions array. This gives us the totals for each suppression hit, file input volume, total drops or hits across all files.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EAEABABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EAEABABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EAEABABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-comment">// Open file and count suppressions</span>
+<span class="highlight-keyword">do</span>
+{
+    <span class="highlight-comment">// Record line</span>
+    current_line = is_csv.ReadLine();
+
+    <span class="highlight-comment">// Split line into array of parts</span>
+    <span class="highlight-keyword">string</span>[] line = current_line.Split(<span class="highlight-keyword">new</span> <span class="highlight-keyword">char</span>[] { <span class="highlight-literal">','</span> });
+
+    <span class="highlight-comment">// Ignore heading line and blanks</span>
+    <span class="highlight-keyword">if</span> ((line[<span class="highlight-number">0</span>] != <span class="highlight-literal">"File"</span>) &amp;&amp; (line[<span class="highlight-number">0</span>] != <span class="highlight-literal">""</span>))
+    {
+        <span class="highlight-comment">// Add values to the totals array</span>
+        <span class="highlight-keyword">for</span> (<span class="highlight-keyword">int</span> i = <span class="highlight-number">1</span>; i &lt; (line.Length - <span class="highlight-number">1</span>); i++)
+              {
+                  <span class="highlight-comment">// Default value if blank</span>
+                  <span class="highlight-keyword">if</span> (line[i] == <span class="highlight-literal">""</span>)
+                  {
+                        line[i] = <span class="highlight-literal">"0"</span>;
+                  }
+
+                  <span class="highlight-comment">// Add values - minus index one as we're not holding the file name in the array</span>
+                  suppression_counts[i - <span class="highlight-number">1</span>] = suppression_counts[i - <span class="highlight-number">1</span>] + Convert.ToInt32(line[i]);
+              }
+        }
+  } <span class="highlight-keyword">while</span> (is_csv.EndOfStream == <span class="highlight-keyword">false</span>);
+
+  <span class="highlight-comment">// Reset reader</span>
+  is_csv.Close();
+  is_csv.Dispose();</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              Using the array that we have just populated, a line to output is created by iterating through the array and adding each item to the line.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EACABABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EACABABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EACABABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-comment">// Build string to print</span>
+StringBuilder totals_output = <span class="highlight-keyword">new</span> StringBuilder();
+
+<span class="highlight-comment">// Add first field</span>
+totals_output.Append(<span class="highlight-literal">"Totals,"</span>);
+
+<span class="highlight-comment">// Loop through array and build string</span>
+<span class="highlight-keyword">foreach</span> (<span class="highlight-keyword">int</span> total <span class="highlight-keyword">in</span> suppression_counts)
+{
+    totals_output.Append(total + <span class="highlight-literal">","</span>);
+}</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              This line is then added to the industry_suppressions.csv, providing the totals at the bottom. We also return the totals at this stage, to be used by the next method in calculating the costs.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EAAABABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EAAABABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EAAABABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-comment">// Write totals to Industry Suppressions csv - true defines appending opposed to overwrite</span>
+StreamWriter is_output = <span class="highlight-keyword">new</span> StreamWriter(file_path,<span class="highlight-keyword">true</span>);
+
+<span class="highlight-comment">// Append blank line</span>
+is_output.WriteLine();
+
+<span class="highlight-comment">// Append totals line</span>
+is_output.WriteLine(totals_output);
+
+<span class="highlight-comment">// Close writer</span>
+is_output.Close();
+is_output.Dispose();
+
+<span class="highlight-comment">// Return totals</span>
+<span class="highlight-keyword">return</span> totals_output.ToString();</pre>
+                </div>
+              </div>
+            </div>
+          </li>
+          <li class="calibre8">
+            <p class="calibre5">
+              <strong class="calibre6">Updating the ExportSuppressionCosts() method</strong>
+            </p>
+            <p class="calibre5">
+              As highlighted in the overview, the ExportSuppressionCosts() is the most convulted of the methods that will need to be updated in the event of a list amendment.
+              The first step of this method, declares and instantiates a few variables, these lines of code won't require any updates.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EAPAAABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EAPAAABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EAPAAABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-comment">// Declare variables</span>
+<span class="highlight-keyword">string</span> file_path = OutputDirectory() + <span class="highlight-literal">"industry_costs.csv"</span>;
+StringBuilder flag_costs = <span class="highlight-keyword">new</span> StringBuilder();
+StringBuilder delete_costs = <span class="highlight-keyword">new</span> StringBuilder();
+
+<span class="highlight-comment">// Retrieve file headings</span>
+FileHeadings file_headings = <span class="highlight-keyword">new</span> FileHeadings();</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              The string of totals, received by this method as a single parameter, and created by the method that we have just updated, is broken into an array so that we can
+              iterate through each volume.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EANAAABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EANAAABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EANAAABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-comment">// Break totals into array</span>
+<span class="highlight-keyword">string</span>[] totals = calculated_totals.Split(<span class="highlight-keyword">new</span> <span class="highlight-keyword">char</span>[] { <span class="highlight-literal">','</span> });</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              There are two loops that we need to perform, this is because we need to calculate both flag and delete costs from the one array, so we'll be looping through it twice.
+              We could perform both operations inside one loop, but this is clearer. The first loop calculates the costings for the flags, in the first part of the loop we populate 
+              any blanks with 0.00 so we don't get any calculation errors when trying to perform arithmetic on an empty value.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EALAAABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EALAAABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EALAAABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-comment">// Calculate flag costs</span>
+<span class="highlight-keyword">for</span> (<span class="highlight-keyword">int</span> i = <span class="highlight-number">0</span>; i &lt; totals.Length; i++)
+{
+      <span class="highlight-comment">// Default if blank</span>
+      <span class="highlight-keyword">if</span> (totals[i] == <span class="highlight-literal">""</span>)
+      {
+          totals[i] = <span class="highlight-literal">"0.00"</span>;
+      }</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              While still in the loop, we then switch the code we execute depending on the field the array is looking at. This is quite a fiddly aspect of the code and will need
+              to be updated should the lists change. The default case, and the bottom of this switch statement is the normal operation that we want to perform on a normal suppression list, like NDR
+              for example. However, there are some fields in the array that we need to treat differently, for example index 0 in this case is the filename and we take the opportunity to append the first
+              part of the line we are creating; the type of cost. Take note that this is seceded by two commas, this is essentially two empty fields that will be represented next to it in the table contained 
+              in the WFD.
+            </p>
+            <p class="calibre5">
+              In some cases below, like 1 or 13 for example, we're ignoring these fields as we don't want to calculate costs as they might not be hits against a list. They could be
+              input or output totals for example. When updating we need to specify what treatment each index in the array receives. In the case of index 12, this is currently the total hits
+              and therefore we calculate the flagging cost for the total number of hits. In the cases of 8 and 11, these are MPS lists, and are therefore FOC.
+            </p>
+            <p class="calibre5">
+              <strong class="calibre6">Any index that is not provided a case will receive the default treatment of being multiplied by 0.6.</strong>
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EAHAAABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EAHAAABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EAHAAABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10">    <span class="highlight-comment">// Ignore filename</span>
+    <span class="highlight-keyword">switch</span> (i)
+    {
+        <span class="highlight-keyword">case</span> <span class="highlight-number">0</span>:
+            flag_costs.Append(<span class="highlight-literal">"Flag,,"</span>);
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">case</span> <span class="highlight-number">1</span>:
+            <span class="highlight-comment">// Ignore</span>
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">case</span> <span class="highlight-number">14</span>:
+            <span class="highlight-comment">// Ignore</span>
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">case</span> <span class="highlight-number">12</span>:
+            <span class="highlight-comment">// Append totals</span>
+            <span class="highlight-keyword">double</span> total = Convert.ToDouble(totals[<span class="highlight-number">14</span>]) * <span class="highlight-number">0.6</span>;
+            flag_costs.Append(total.ToString() + <span class="highlight-literal">","</span>);
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">case</span> <span class="highlight-number">13</span>:
+            <span class="highlight-comment">// Ignore</span>
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">case</span> <span class="highlight-number">8</span>:
+            flag_costs.Append(<span class="highlight-literal">"FOC,"</span>);
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">case</span> <span class="highlight-number">11</span>:
+            flag_costs.Append(<span class="highlight-literal">"FOC,"</span>);
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">case</span> <span class="highlight-number">15</span>:
+            <span class="highlight-comment">// Ignore </span>
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">case</span> <span class="highlight-number">16</span>:
+            <span class="highlight-comment">// Ignore</span>
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">default</span>:
+            <span class="highlight-comment">// Calculate flag cost and append to the totals string</span>
+            <span class="highlight-keyword">double</span> calc = Convert.ToDouble(totals[i]) * <span class="highlight-number">0.6</span>;
+            flag_costs.Append(calc.ToString() + <span class="highlight-literal">","</span>);
+            <span class="highlight-keyword">break</span>;
+    }
+}</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              The process for calculating the delete costs is almost identical to calculating the flag costs. Again,  we populate
+              any blanks with 0.00 so we don't get any calculation errors when trying to perform arithmetic on an empty value.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EAFAAABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EAFAAABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EAFAAABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-comment">// Calculate delete costs</span>
+<span class="highlight-keyword">for</span> (<span class="highlight-keyword">int</span> i = <span class="highlight-number">0</span>; i &lt; totals.Length; i++)
+{
+      <span class="highlight-comment">// Default if blank</span>
+      <span class="highlight-keyword">if</span> (totals[i] == <span class="highlight-literal">""</span>)
+      {
+          totals[i] = <span class="highlight-literal">"0.00"</span>;
+      }</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              The only differences between the switch statement for the deletes and for the flags, is that any address change lists are specified as REDIRECT ONLY. As you can
+              see below this has been split across the two address change lists; NCOA and GAS Reactive.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EADAAABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EADAAABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EADAAABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10">    <span class="highlight-comment">// Ignore filename</span>
+    <span class="highlight-keyword">switch</span> (i)
+    {
+        <span class="highlight-keyword">case</span> <span class="highlight-number">0</span>:
+            delete_costs.Append(<span class="highlight-literal">"Delete,,"</span>);
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">case</span> <span class="highlight-number">1</span>:
+            <span class="highlight-comment">// Ignore input totals</span>
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">case</span> <span class="highlight-number">2</span>:
+            delete_costs.Append(<span class="highlight-literal">"REDIRECT,"</span>);
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">case</span> <span class="highlight-number">3</span>:
+            delete_costs.Append(<span class="highlight-literal">"ONLY,"</span>);
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">case</span> <span class="highlight-number">12</span>:
+            <span class="highlight-comment">// Append totals</span>
+            <span class="highlight-keyword">double</span> total = Convert.ToDouble(totals[<span class="highlight-number">14</span>]) * <span class="highlight-number">0.2</span>;
+            delete_costs.Append(total.ToString() + <span class="highlight-literal">","</span>);
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">case</span> <span class="highlight-number">13</span>:
+            <span class="highlight-comment">// Ignore input totals</span>
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">case</span> <span class="highlight-number">14</span>:
+            <span class="highlight-comment">// Ignore input totals</span>
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">case</span> <span class="highlight-number">15</span>:
+            <span class="highlight-comment">// Ignore output totals</span>
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">case</span> <span class="highlight-number">8</span>:
+            delete_costs.Append(<span class="highlight-literal">"FOC,"</span>);
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">case</span> <span class="highlight-number">11</span>:
+            delete_costs.Append(<span class="highlight-literal">"FOC,"</span>);
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">case</span> <span class="highlight-number">16</span>:
+            <span class="highlight-comment">// Ignore</span>
+            <span class="highlight-keyword">break</span>;
+        <span class="highlight-keyword">default</span>:
+            <span class="highlight-comment">// Calculate flag cost and append to the totals string</span>
+            <span class="highlight-keyword">double</span> calc = Convert.ToDouble(totals[i]) * <span class="highlight-number">0.2</span>;
+            delete_costs.Append(calc.ToString() + <span class="highlight-literal">","</span>);
+            <span class="highlight-keyword">break</span>;
+    }
+}</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              The remaining section of code in this method merely outputs the costs to the file; pulling in the heading and subsequently the line for the flags and
+              deletes respectively. This code does not need to be updated.
+            </p>
+            <div class="codesnippetcontainer">
+              <div class="codesnippetcontainercodecontainer">
+                <div class="codesnippettoolbar">
+                  <div class="codesnippettoolbartext">
+                    <a href="#" id="ID0EABAAABAAA_copyCode" onclick="javascript:CopyToClipboard('ID0EABAAABAAA');return false;" title="Copy" class="pcalibre1 pcalibre calibre9 pcalibre3 pcalibre2">Copy</a>
+                  </div>
+                </div>
+                <div class="codesnippetcontainercode" id="ID0EABAAABAAA_code_Div1">
+                  <pre xml:space="preserve" class="calibre10"><span class="highlight-comment">// Write output totals to file</span>
+StreamWriter cost_output = <span class="highlight-keyword">new</span> StreamWriter(file_path, <span class="highlight-keyword">true</span>);
+
+<span class="highlight-comment">// Write heading</span>
+cost_output.WriteLine(file_headings.GetCostHeadings());
+<span class="highlight-comment">// Write flags</span>
+cost_output.WriteLine(flag_costs.ToString());
+<span class="highlight-comment">// Write deletes</span>
+cost_output.WriteLine(delete_costs.ToString());
+
+<span class="highlight-comment">// Close writer</span>
+cost_output.Close();
+cost_output.Dispose();</pre>
+                </div>
+              </div>
+            </div>
+            <p class="calibre5">
+              <strong class="calibre6">That covers the changes that need to be made to the code, the changes that need to be made to the WFDs are documented separately.</strong>
+            </p>
+          </li>
+        </ol>
+      </div>
+    </div>
+  </div>
+  <div class="pagefooter" id="pageFooter"></div>
+
+
+  </div>
+
+  
+  <div class="calibreToc">
+    <h2><a href="../n4gxd-4gu80.html"> Table of contents</a></h2>
+     <div>
+  <ul>
+    <li>
+      <a href="aca033af-aa66-4819-abb4-b29dfb7966d4.htm">Healthcheck Plus 2 Documentation</a>
+    </li>
+    <li>
+      <a href="57aab383-fefa-41f7-9a0d-6c4ea22ffc96.htm">Updating the Client Data Directory</a>
+    </li>
+    <li>
+      <a href="9e5bb667-3ff6-4a6e-ba91-7c40bc7882b6.htm">Updating the Cygnus Job Directory</a>
+    </li>
+    <li>
+      <a href="239b501a-f1e0-4ee6-bce2-6a8e2b520998.htm">Updating Industry Suppression Lists</a>
+    </li>
+    <li>
+      <a href="b4af800d-ebce-22f3-26ce-9c1fa68fda3e.htm">Healthcheck_Plus_2</a>
+    </li>
+    <li>
+      <a href="c28752e7-e646-b674-a067-8756e4b42da9.htm">FileHeadings Class</a>
+    </li>
+    <li>
+      <a href="f682d98d-18f2-82f5-9628-1395bb23db36.htm">FileHeadings Constructor </a>
+    </li>
+    <li>
+      <a href="3e453c5e-265d-6d9c-83fc-3d0a77dfe601.htm">FileHeadings Methods</a>
+    </li>
+    <li>
+      <a href="ffaca512-63c3-9b97-0004-20b6f24ab892.htm">GetCostHeadings Method </a>
+    </li>
+    <li>
+      <a href="9c99290a-b98d-a15e-31e8-cf88a6a2f65f.htm">GetDedupeExampleHeadings Method </a>
+    </li>
+    <li>
+      <a href="b419741e-9072-3b06-824d-08420a3348d4.htm">GetDedupeInformationHeadings Method </a>
+    </li>
+    <li>
+      <a href="82c246a8-c104-b2cd-f986-a9298902fb97.htm">GetDedupeStatsHeadings Method </a>
+    </li>
+    <li>
+      <a href="b7370f1d-3ac8-a004-b34f-9ce4d9ca7819.htm">GetDedupeTotalHeadings Method </a>
+    </li>
+    <li>
+      <a href="f4bfcd4c-2cae-41e7-b502-29c71cc56422.htm">GetDownloadStatsHeadings Method </a>
+    </li>
+    <li>
+      <a href="9c9db273-baf5-bab1-2685-816a7cf52ea3.htm">GetStructureHeadings Method </a>
+    </li>
+    <li>
+      <a href="50aa3fbe-3414-0bd2-9940-7cbdeecf274c.htm">GetSuppressionHeadings Method </a>
+    </li>
+    <li>
+      <a href="a6b99418-aee7-e6f4-6e41-3244a67b50fc.htm">Window_ForenameMatching Class</a>
+    </li>
+    <li>
+      <a href="75f41cc3-5662-69fd-4bff-a1f8658027ee.htm">Window_ForenameMatching Constructor </a>
+    </li>
+    <li>
+      <a href="6d797869-1cc8-6fa5-69ed-1227185b6f4b.htm">Window_ForenameMatching Methods</a>
+    </li>
+    <li>
+      <a href="b7d4250e-6572-f405-9f4f-9fbfd9f8571f.htm">ConfirmMatchLevel_Click Method </a>
+    </li>
+    <li>
+      <a href="45a8e088-5702-e2e4-8978-85aff235b897.htm">GetDedupingLevel Method </a>
+    </li>
+    <li>
+      <a href="d59775f7-e0f3-a1cc-3567-994f0c3e3343.htm">GetSuppressionLevel Method </a>
+    </li>
+    <li>
+      <a href="9b859e41-06a1-cdf7-96b3-a46eb17b021c.htm">InitializeComponent Method </a>
+    </li>
+    <li>
+      <a href="0153c185-3ba2-2adf-e19c-96bc893eea02.htm">SetWindowText Method </a>
+    </li>
+    <li>
+      <a href="793cda3b-d847-6962-2b5f-ab9a0019c01f.htm">Window_IndustryMatching Class</a>
+    </li>
+    <li>
+      <a href="d82c24e0-dee5-7097-c9ba-5faa8a2ee753.htm">Window_IndustryMatching Constructor </a>
+    </li>
+    <li>
+      <a href="dd96a253-759f-36f7-f5b3-7eaf1c5ef0d2.htm">Window_IndustryMatching Methods</a>
+    </li>
+    <li>
+      <a href="df0f05e0-2db3-528d-4400-30a9b50d9f62.htm">ConfirmIndustryLevel_Click Method </a>
+    </li>
+    <li>
+      <a href="f2998236-b665-1e52-b12a-32064330d51a.htm">GetIndustryLevel Method </a>
+    </li>
+    <li>
+      <a href="8b1acea2-56ac-15fe-1e50-86ca0bdd5f2f.htm">InitializeComponent Method </a>
+    </li>
+    <li>
+      <a href="93ee7343-0c41-f612-fe34-e473f9185ee9.htm">Window_Main Class</a>
+    </li>
+    <li>
+      <a href="c9b988a9-0e3a-a33a-ee10-d507ba129ef1.htm">Window_Main Constructor </a>
+    </li>
+    <li>
+      <a href="12dbaee0-0375-969e-48fa-9b0a1a26a15e.htm">Window_Main Methods</a>
+    </li>
+    <li>
+      <a href="88bfd8cd-1f95-4968-39fc-f2d0819e781d.htm">BatchDirectory Method </a>
+    </li>
+    <li>
+      <a href="4740e4d1-ca26-ad55-dbe9-6c91ba43e3c9.htm">CalculateDedupeFileTotals Method </a>
+    </li>
+    <li>
+      <a href="7800a388-03e0-9931-5f16-a7643ec99ba8.htm">CalculateDownloadTotals Method </a>
+    </li>
+    <li>
+      <a href="38f3d30c-a081-a4db-8084-52506449dc85.htm">CalculateFinalDedupeTotals Method </a>
+    </li>
+    <li>
+      <a href="2db5255e-cbbc-d4e9-b51a-5bf1bc0dd569.htm">CalculateIndustryTotals Method </a>
+    </li>
+    <li>
+      <a href="cc486cf9-761a-625c-18a3-27707831dce0.htm">CheckDedupesExist Method </a>
+    </li>
+    <li>
+      <a href="43f7a2d9-b253-e535-a2ce-71aae2dda483.htm">CheckDownloadsExist Method </a>
+    </li>
+    <li>
+      <a href="d9406ad1-792b-1651-9afc-dc4c5fbcdb84.htm">CheckInstallations Method </a>
+    </li>
+    <li>
+      <a href="a4ec6a1d-c122-c8fe-0bb5-900fe668c904.htm">CheckISExist Method </a>
+    </li>
+    <li>
+      <a href="b70af4c2-f6dd-c10d-09fc-f62b464782bb.htm">CompressHealthcheckReport Method </a>
+    </li>
+    <li>
+      <a href="70b1822e-c02a-8ed0-4600-cf731cbf9896.htm">ConfirmAnimations Method </a>
+    </li>
+    <li>
+      <a href="ba23fe5e-a6c0-535c-1f91-fe4aaac74778.htm">CreateHealthcheckReport Method </a>
+    </li>
+    <li>
+      <a href="b696ad61-e659-b66b-0a62-2bbe8029766d.htm">CreateReport_Click Method </a>
+    </li>
+    <li>
+      <a href="faae1e7a-fdc6-7aeb-4675-0d5635bb9c5f.htm">CygnusJobDirectory Method </a>
+    </li>
+    <li>
+      <a href="7de4d959-63d7-3d69-fd19-e50b3befa4a8.htm">DedupeAnimations Method </a>
+    </li>
+    <li>
+      <a href="75893e92-8473-8821-6a06-263dc64c02c1.htm">EndDedupeAnimations Method </a>
+    </li>
+    <li>
+      <a href="7cf5c510-f263-0c0c-b36f-f861dc89f6a0.htm">ExportDedupeExamples Method </a>
+    </li>
+    <li>
+      <a href="2bbdd421-31bd-ff25-385c-97b3088e567f.htm">ExportDedupeInformation Method </a>
+    </li>
+    <li>
+      <a href="94a5821c-c062-ae22-356e-c3b03e56bb62.htm">ExportDedupeStatistics Method </a>
+    </li>
+    <li>
+      <a href="ee6392d6-c254-727e-eba1-c1c35b277216.htm">ExportDownloadStatistics Method </a>
+    </li>
+    <li>
+      <a href="f8575edd-61a1-2a1b-11e2-db963d92bc9d.htm">ExportDropsMatrix Method </a>
+    </li>
+    <li>
+      <a href="4e709748-7042-192e-f59a-fc261935b413.htm">ExportFileStructures Method </a>
+    </li>
+    <li>
+      <a href="6902a801-675e-81d1-1011-070984759621.htm">ExportIndustrySuppressions Method </a>
+    </li>
+    <li>
+      <a href="ebacc5a9-3e60-2036-66b1-66325dd66867.htm">ExportSuppressionCosts Method </a>
+    </li>
+    <li>
+      <a href="e57d964d-b701-9b7d-2243-aa9260d8d47d.htm">FilesConfirm_Click Method </a>
+    </li>
+    <li>
+      <a href="95279658-d55b-6674-5021-9d2e3c9e6346.htm">FilesOnWorkflow Method </a>
+    </li>
+    <li>
+      <a href="0aae38d5-c6e0-b574-1ff3-bd5bd482f735.htm">ForenameMatching Method </a>
+    </li>
+    <li>
+      <a href="eda82416-8e9a-4f70-1e66-9b52b8328db9.htm">FormatName Method </a>
+    </li>
+    <li>
+      <a href="2fcf0b3f-c5ba-35a4-e358-b6851a12f1a6.htm">IndustryLevel Method </a>
+    </li>
+    <li>
+      <a href="51f6950c-f891-5d0c-5e43-930cf4ac53ba.htm">InitializeComponent Method </a>
+    </li>
+    <li>
+      <a href="6f5c2f2d-299a-9b25-d523-a07d5b0cd1ad.htm">JobConfirm_Click Method </a>
+    </li>
+    <li>
+      <a href="654985e1-e993-d69f-2dae-298a491d78e1.htm">JobInformation Method </a>
+    </li>
+    <li>
+      <a href="8deb3046-8609-bf0f-bc90-50eb56ddfd61.htm">MailingFileList_MouseDoubleClick Method </a>
+    </li>
+    <li>
+      <a href="2b39700c-a2df-5f2c-b11d-2e70cc6be332.htm">MainFileProcessing Method </a>
+    </li>
+    <li>
+      <a href="b7fae79c-07ee-c86b-3f1f-dd25ea0d9afa.htm">MergedXMLCleaner Method </a>
+    </li>
+    <li>
+      <a href="40ab20e4-2331-fa1a-98b0-387734d7ddfd.htm">MergedXMLPath Method </a>
+    </li>
+    <li>
+      <a href="0383de12-1931-b3b7-4d21-f422932695c9.htm">OutputDirectory Method </a>
+    </li>
+    <li>
+      <a href="ed7a107e-520e-6f6c-6f27-036c79095786.htm">OverseasRedirects Method </a>
+    </li>
+    <li>
+      <a href="f944a228-dbf0-c243-8b9f-cb0024a59ec1.htm">ProcessDownloadInformation Method </a>
+    </li>
+    <li>
+      <a href="6a05d8dc-54fe-38a3-7134-159e6f10ef0f.htm">ProcessIndustrySuppressions Method </a>
+    </li>
+    <li>
+      <a href="ea836419-89c9-a396-8c06-b209ef42958b.htm">ReadInDirectories Method </a>
+    </li>
+    <li>
+      <a href="e6df1345-bedb-411d-ed47-c015b5124155.htm">RecentJobList_SelectionChanged Method </a>
+    </li>
+    <li>
+      <a href="9ff4c0bb-a781-6429-6578-f2284ac1f5d3.htm">RecentlyReportedJobs Method </a>
+    </li>
+    <li>
+      <a href="50611804-2a27-1242-bdc9-265d863759e7.htm">RefreshJobList Method </a>
+    </li>
+    <li>
+      <a href="706c4afb-c6a3-5101-1fdf-1c6c706c7497.htm">RetrieveDedupeInformation Method </a>
+    </li>
+    <li>
+      <a href="431c039b-2dda-991c-f3c5-45c609572e04.htm">RootOnServer Method </a>
+    </li>
+    <li>
+      <a href="bee103bb-6d5a-8435-9aa2-d6e9af94c6ef.htm">RunAnimations Method </a>
+    </li>
+    <li>
+      <a href="fdfeba89-0a17-23e3-a8f7-a762d0da6134.htm">RunDedupe_Click Method </a>
+    </li>
+    <li>
+      <a href="54ff9cbc-7eba-f633-d3c8-169bb1e4f41f.htm">SelectUser Method </a>
+    </li>
+    <li>
+      <a href="9b7407a6-e1b3-3971-b260-91fe0ebd76b0.htm">SendReportEmail Method </a>
+    </li>
+    <li>
+      <a href="42610226-af3f-ebc0-8038-36a16aacce64.htm">SummaryAnimations Method </a>
+    </li>
+  </ul>
+</div>
+
+
+  </div>
+  
+
+  <div class="calibreEbNav">
+    
+      <a href="9e5bb667-3ff6-4a6e-ba91-7c40bc7882b6.htm" class="calibreAPrev">previous page</a>
+    
+
+    <a href="../n4gxd-4gu80.html" class="calibreAHome"> start</a>
+
+    
+      <a href="b4af800d-ebce-22f3-26ce-9c1fa68fda3e.htm" class="calibreANext"> next page</a>
+    
+  </div>
+
+</div>
+
+</body>
+</html>
